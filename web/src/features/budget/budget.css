@@ -1,0 +1,15 @@
+.bg-kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-4); margin-bottom: var(--space-5); }
+.bg-kpi__val { font-size: var(--text-2xl); font-weight: 700; letter-spacing: -0.01em; }
+.bg-kpi__label { color: var(--text-muted); font-size: var(--text-sm); }
+
+.bg-table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); }
+.bg-table th, .bg-table td { padding: var(--space-2) var(--space-3); border-bottom: 1px solid var(--border); text-align: left; }
+.bg-table th { font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-subtle); }
+.bg-table td.num, .bg-table th.num { text-align: right; font-variant-numeric: tabular-nums; font-family: var(--font-mono); }
+.bg-cat-row td { background: var(--bg-sunken); font-weight: var(--weight-semibold); }
+.bg-item-row { cursor: pointer; }
+.bg-item-row:hover td { background: var(--surface-hover); }
+.bg-neg { color: var(--red-500); }
+.bg-pos { color: var(--green-500); }
+.bg-total-row td { border-top: 2px solid var(--border-strong); font-weight: var(--weight-bold); }
+.bg-actions { display: flex; justify-content: flex-end; }

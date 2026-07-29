@@ -1,0 +1,96 @@
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+jobs:
+  backend:
+    name: Backend (syntax + unit tests)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci || npm install
+      - name: Syntax check all source
+        run: |
+          find src -name '*.js' -print0 | xargs -0 -n1 node --check
+          node --check migrate.js
+      - name: Unit tests
+        run: npm test
+
+  integration:
+    name: Backend (live integration vs Postgres)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: buildforge
+          POSTGRES_PASSWORD: buildforge
+          POSTGRES_DB: buildforge
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U buildforge"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgres://buildforge:buildforge@localhost:5432/buildforge
+      PGSSL: disable
+      JWT_SECRET: ci-integration-secret
+      ALLOWED_ORIGINS: http://localhost:5173
+      PORT: 4000
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci || npm install
+      - name: Run migrations (fresh database)
+        run: node migrate.js
+      - name: Boot API and run end-to-end smoke
+        run: |
+          node src/index.js > server.log 2>&1 &
+          SERVER_PID=$!
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:4000/api/health && break
+            sleep 1
+          done
+          # First boot on a fresh DB must be clean: no deadlocks, no relation errors.
+          if grep -Ei 'deadlock|does not exist' server.log; then
+            echo '::error::boot-time migration errors on fresh database'
+            cat server.log
+            exit 1
+          fi
+          node test/integration/smoke.js
+          kill $SERVER_PID
+      - name: Show server log on failure
+        if: failure()
+        run: cat server.log || true
+
+  web:
+    name: Web (typecheck + build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci || npm install
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Build
+        run: npm run build

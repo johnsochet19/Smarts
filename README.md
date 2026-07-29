@@ -1,41 +1,60 @@
-# JR Fine Wood LLC — website
+# BuildForge — Enterprise Project & Construction Operations Platform
 
-Static marketing site for JR Fine Wood LLC (bespoke furniture & joinery), built from the
-uploaded design draft (`Website_design_request.zip`) and finished for deployment.
+Smartsheet-class project management built for construction operations: punchlists,
+scheduling, sheets, dashboards, automation, forms, and AI-assisted insight —
+responsive from desktop down to phones.
 
-## Pages
+This repository is the **consolidated, clean platform**: the hardened backend and the
+rebuilt TypeScript/React frontend, without the legacy monolith or code-generation
+scripts that previously lived alongside them in `johnsochet19/scheduler`.
 
-| File | Page |
+## Layout
+
+| Path | What it is |
 |---|---|
-| `index.html` | Home — hero, services overview, featured work, Instagram, about, CTA |
-| `work.html` | Portfolio gallery |
-| `services.html` | Services + commission process |
-| `contact.html` | Contact details + enquiry form |
+| `backend/` | Node/Express + PostgreSQL API — ~50 domain modules (projects, tasks, punch items, RFIs, submittals, daily logs, inspections, cost management, timesheets, meetings, permits, photos, documents, notifications, audit log, search, sheets, automations, forms, MFA, AI) |
+| `backend/migrations/` | Forward-only SQL migrations (single source of truth for schema) |
+| `backend/test/` | Unit tests (security, automation engine, TOTP) + live integration smoke |
+| `web/` | Rebuilt frontend — Vite + React + TypeScript on a token-based design system; responsive with mobile bottom navigation |
+| `docs/` | Full audit, increment logs, QA reports |
+| `website/` | Unrelated static site (JR Fine Wood) preserved from this repo's earlier history |
+| `.github/workflows/ci.yml` | CI: unit tests, syntax checks, typecheck, build, **live integration against Postgres 16** |
 
-Shared assets live in `css/site.css`, `js/site.js` and `assets/` (logos).
+## Quick start (local)
 
-## What "finished" means here
+```bash
+# 1. Database
+createdb buildforge
 
-- Converted from the design-tool export (`.dc.html` + React runtime) to plain, dependency-free HTML/CSS/JS.
-- Proper `<head>` on every page: titles, meta descriptions, Open Graph tags, favicon.
-- Fully responsive: mobile nav with hamburger menu, fluid type via `clamp()`, all grids collapse cleanly; respects `prefers-reduced-motion`.
-- Contact form works: validates name/email/piece, then composes a pre-filled email to `hello@jrfinewood.com` (no backend required).
-- Editor notes ("DROP INSTAGRAM PHOTO" etc.) removed; photo slots are styled placeholder tiles with captions.
+# 2. Backend
+cd backend && npm install
+DATABASE_URL=postgres://localhost/buildforge node migrate.js
+DATABASE_URL=postgres://localhost/buildforge PGSSL=disable \
+  JWT_SECRET=change-me ALLOWED_ORIGINS=http://localhost:5173 PORT=4000 npm start
 
-## Still to do (needs the client)
+# 3. First admin account
+DATABASE_URL=postgres://localhost/buildforge ADMIN_EMAIL=you@example.com \
+  ADMIN_PASSWORD=strong-password node createAdmin.js
 
-- **Photos** — every `.ph` element is a placeholder tile. Replace with real photos from
-  [@00_jr_wood](https://www.instagram.com/00_jr_wood), e.g.
-  `<div class="ph tile g-lg" style="background:url('assets/work/table.jpg') center/cover;">`.
-- **Form backend (optional)** — the form currently opens the visitor's email app. For silent
-  submission, point it at a service like Formspree and remove the `mailto:` handler in `js/site.js`.
-- Confirm the stats (18 years, 400+ pieces) and testimonial copy with the owner.
-
-## Run locally
-
-```sh
-python3 -m http.server 8000
-# open http://localhost:8000
+# 4. Frontend
+cd ../web && npm install
+cp .env.example .env   # VITE_API_BASE defaults to http://localhost:4000/api
+npm run dev            # http://localhost:5173
 ```
 
-No build step. Deployable as-is to GitHub Pages, Netlify, or any static host.
+## Verification
+
+- `cd backend && npm test` — unit tests
+- `node backend/test/integration/smoke.js` — 40+ live API calls across every module
+  (requires a running server; CI does this automatically against Postgres 16)
+- `cd web && npm run typecheck && npm run build`
+
+See `docs/QA-REPORT-LIVE.md` for the latest full end-to-end verification (real
+database, real browser, desktop + mobile) and the bugs it found and fixed.
+
+## Deployment
+
+- Backend: Railway/Render/Fly-style Node host (`railway.json`, `backend/nixpacks.toml`).
+  Required env: `DATABASE_URL`, `JWT_SECRET` (boot-enforced in production),
+  `ALLOWED_ORIGINS`; optional `ANTHROPIC_API_KEY` (AI assistant), `PGSSL=verify`.
+- Frontend: any static host (Vercel config in `web/vercel.json`); set `VITE_API_BASE`.

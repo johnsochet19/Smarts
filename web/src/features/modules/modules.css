@@ -1,0 +1,13 @@
+.mod-table { overflow: hidden; }
+.mod-thead { display: grid; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--border); background: var(--bg-sunken); }
+.mod-th { font-size: var(--text-xs); font-weight: var(--weight-semibold); color: var(--text-subtle); text-transform: uppercase; letter-spacing: 0.04em; }
+.mod-tr { display: grid; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--border); cursor: pointer; align-items: center; transition: background var(--dur-fast); }
+.mod-tr:last-child { border-bottom: none; }
+.mod-tr:hover { background: var(--surface-hover); }
+.mod-td { font-size: var(--text-sm); min-width: 0; }
+
+@media (max-width: 767px) {
+  /* Collapse to the first two columns on phones for readability. */
+  .mod-thead, .mod-tr { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) !important; }
+  .mod-th:nth-child(n+3), .mod-td:nth-child(n+3) { display: none; }
+}

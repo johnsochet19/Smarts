@@ -1,0 +1,27 @@
+.an-kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-4); margin-bottom: var(--space-5); }
+.an-kpi__val { font-size: var(--text-3xl); font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; }
+.an-kpi__label { color: var(--text-muted); font-size: var(--text-sm); }
+.an-kpi__sub { font-size: var(--text-xs); color: var(--text-subtle); margin-top: 2px; }
+
+.an-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
+.an-span { grid-column: 1 / -1; }
+.an-title { font-size: var(--text-md); margin-bottom: var(--space-4); }
+
+.an-hbar { display: grid; grid-template-columns: 120px 1fr 40px; align-items: center; gap: var(--space-3); margin-bottom: var(--space-3); }
+.an-hbar__label { font-size: var(--text-sm); color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.an-hbar__track { height: 10px; background: var(--bg-sunken); border-radius: var(--radius-full); overflow: hidden; }
+.an-hbar__fill { height: 100%; border-radius: var(--radius-full); min-width: 2px; transition: width var(--dur) var(--ease); }
+.an-hbar__val { text-align: right; font-variant-numeric: tabular-nums; font-weight: var(--weight-semibold); font-size: var(--text-sm); }
+
+/* Donut */
+.an-donut { display: flex; align-items: center; gap: var(--space-5); flex-wrap: wrap; }
+.an-legend { display: flex; flex-direction: column; gap: var(--space-2); }
+.an-legend__row { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-sm); }
+.an-legend__dot { width: 10px; height: 10px; border-radius: 3px; flex: none; }
+
+.an-table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); }
+.an-table th, .an-table td { text-align: left; padding: var(--space-2) var(--space-3); border-bottom: 1px solid var(--border); }
+.an-table th { color: var(--text-subtle); font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.04em; }
+.an-table td.num, .an-table th.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+@media (max-width: 900px) { .an-kpis { grid-template-columns: repeat(2,1fr); } .an-grid { grid-template-columns: 1fr; } }

@@ -1,0 +1,13 @@
+.fl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: var(--space-4); }
+.fl-card { cursor: pointer; overflow: hidden; padding: 0; }
+.fl-thumb { height: 120px; background: var(--bg-sunken); display: grid; place-items: center; color: var(--text-subtle); overflow: hidden; }
+.fl-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.fl-body { padding: var(--space-3); }
+.fl-name { font-weight: var(--weight-medium); font-size: var(--text-sm); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fl-meta { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-xs); color: var(--text-subtle); margin-top: 3px; }
+.fl-vbadge { font-size: 10px; color: var(--accent); border: 1px solid var(--accent); border-radius: var(--radius-full); padding: 0 6px; }
+
+.fl-preview img { width: 100%; border-radius: var(--radius-md); border: 1px solid var(--border); }
+.fl-version { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-2) 0; border-bottom: 1px solid var(--border); font-size: var(--text-sm); }
+.fl-dropzone { border: 2px dashed var(--border-strong); border-radius: var(--radius-lg); padding: var(--space-8); text-align: center; color: var(--text-muted); transition: border-color var(--dur-fast), background var(--dur-fast); cursor: pointer; }
+.fl-dropzone--over { border-color: var(--accent); background: var(--accent-soft); }

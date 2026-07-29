@@ -1,0 +1,23 @@
+/* Bell + badge */
+.nt-bell { position: relative; }
+.nt-badge { position: absolute; top: -3px; right: -3px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 999px; background: var(--red-500); color: #fff; font-size: 10px; font-weight: 700; display: grid; place-items: center; line-height: 1; border: 2px solid var(--bg-elevated); }
+
+/* Dropdown panel */
+.nt-panel { position: absolute; top: 46px; right: 0; width: min(380px, calc(100vw - 24px)); background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); z-index: var(--z-modal); overflow: hidden; animation: bf-slide-up var(--dur-fast) var(--ease); }
+.nt-panel__head { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--border); }
+.nt-panel__list { max-height: 60vh; overflow: auto; }
+.nt-panel__foot { padding: var(--space-2); border-top: 1px solid var(--border); text-align: center; }
+
+.nt-item { display: flex; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--border); cursor: pointer; align-items: flex-start; }
+.nt-item:hover { background: var(--surface-hover); }
+.nt-item--unread { background: color-mix(in srgb, var(--accent) 6%, transparent); }
+.nt-item__icon { width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center; flex: none; background: var(--surface-hover); }
+.nt-item__body { flex: 1; min-width: 0; }
+.nt-item__title { font-weight: var(--weight-medium); font-size: var(--text-sm); }
+.nt-item__msg { font-size: var(--text-xs); color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.nt-item__time { font-size: var(--text-xs); color: var(--text-subtle); margin-top: 2px; }
+.nt-item__dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex: none; margin-top: 6px; }
+
+/* Full page */
+.nt-page { max-width: 760px; }
+.nt-toolbar { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-4); }

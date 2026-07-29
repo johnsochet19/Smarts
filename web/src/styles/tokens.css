@@ -1,0 +1,121 @@
+/* ============================================================
+   BuildForge Design System — tokens
+   Single source of truth for spacing, type, color, radius, shadow.
+   Light + dark themes via [data-theme].
+   ============================================================ */
+:root {
+  /* Spacing scale (4px base) */
+  --space-0: 0;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* Typography */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
+  --text-xs: 11px;
+  --text-sm: 13px;
+  --text-base: 14px;
+  --text-md: 16px;
+  --text-lg: 18px;
+  --text-xl: 22px;
+  --text-2xl: 28px;
+  --text-3xl: 34px;
+  --leading-tight: 1.2;
+  --leading-normal: 1.5;
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* Radius */
+  --radius-sm: 6px;
+  --radius-md: 9px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-full: 999px;
+
+  /* Brand + semantic hues (theme-independent) */
+  --blue-500: #3b82f6;
+  --blue-600: #2563eb;
+  --green-500: #22c55e;
+  --amber-500: #f59e0b;
+  --red-500: #ef4444;
+  --violet-500: #8b5cf6;
+  --slate-500: #64748b;
+
+  /* Motion */
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-fast: 120ms;
+  --dur: 200ms;
+
+  /* Z-index scale */
+  --z-sticky: 100;
+  --z-drawer: 400;
+  --z-modal: 500;
+  --z-toast: 600;
+}
+
+/* Light theme (default) */
+:root,
+[data-theme='light'] {
+  --bg: #f6f7f9;
+  --bg-elevated: #ffffff;
+  --bg-sunken: #eef0f3;
+  --surface: #ffffff;
+  --surface-hover: #f3f5f8;
+  --border: #e3e6eb;
+  --border-strong: #cfd4dc;
+  --text: #11151c;
+  --text-muted: #5b6472;
+  --text-subtle: #8a94a3;
+  --accent: var(--blue-600);
+  --accent-fg: #ffffff;
+  --accent-soft: #e8f0fe;
+  --focus-ring: rgba(37, 99, 235, 0.35);
+  --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.06), 0 1px 3px rgba(16, 24, 40, 0.05);
+  --shadow-md: 0 4px 12px rgba(16, 24, 40, 0.08), 0 2px 4px rgba(16, 24, 40, 0.05);
+  --shadow-lg: 0 12px 32px rgba(16, 24, 40, 0.14);
+  --scrim: rgba(17, 21, 28, 0.42);
+}
+
+/* Dark theme */
+[data-theme='dark'] {
+  --bg: #0b0d12;
+  --bg-elevated: #14171f;
+  --bg-sunken: #090b10;
+  --surface: #161a23;
+  --surface-hover: #1d222d;
+  --border: #252b37;
+  --border-strong: #333b4a;
+  --text: #eef1f6;
+  --text-muted: #9aa4b4;
+  --text-subtle: #6b7585;
+  --accent: var(--blue-500);
+  --accent-fg: #ffffff;
+  --accent-soft: #16243d;
+  --focus-ring: rgba(59, 130, 246, 0.45);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 6px 16px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.55);
+  --scrim: rgba(0, 0, 0, 0.6);
+}
+
+/* Status colors (shared, used by badges/boards) */
+:root {
+  --status-draft: var(--slate-500);
+  --status-open: var(--blue-500);
+  --status-in_progress: var(--amber-500);
+  --status-ready_for_review: var(--violet-500);
+  --status-closed: var(--green-500);
+  --prio-low: var(--slate-500);
+  --prio-normal: var(--blue-500);
+  --prio-high: var(--red-500);
+}
