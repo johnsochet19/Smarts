@@ -1,5 +1,14 @@
 import type { PunchPriority, PunchStatus, PunchType } from './constants';
 
+export interface PunchComment {
+  id: number;
+  punch_item_id: number;
+  user_id?: number | null;
+  user_name?: string | null;
+  comment: string;
+  created_at: string;
+}
+
 export interface PunchPhoto {
   id: number;
   punch_item_id: number;

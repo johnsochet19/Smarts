@@ -1,11 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
 import { AppShell } from '@/components/layout/AppShell';
-import { Card, EmptyState, Spinner, Badge } from '@/components/ui/primitives';
+import { Card, EmptyState, Spinner, Badge, Button, Input } from '@/components/ui/primitives';
 import { Icon } from '@/components/ui/Icon';
+import { useToast } from '@/components/ui/toast';
+import { useAuth } from '@/lib/auth';
 import { useProjects } from '@/lib/projects';
 import { formatDate, titleCase } from '@/lib/format';
 import { scheduleApi } from '@/features/schedule/api';
 import type { Task } from '@/features/schedule/types';
+import { workspacesApi } from './workspacesApi';
+import type { Workspace } from './workspacesApi';
 import './projects.css';
 
 interface Health {
@@ -38,8 +42,49 @@ function healthColor(score: number | null): string {
 
 export function ProjectsPage() {
   const { projects, loading, setActiveId } = useProjects();
+  const toast = useToast();
+  const { user } = useAuth();
   const [health, setHealth] = useState<Record<number, Health>>({});
   const [computing, setComputing] = useState(true);
+  const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
+  const [wsFilter, setWsFilter] = useState<number | 'all' | 'none'>('all');
+  const [creatingWs, setCreatingWs] = useState(false);
+  const [wsName, setWsName] = useState('');
+  // Workspace assignments made locally, so the list updates without a refetch.
+  const [wsOverrides, setWsOverrides] = useState<Record<number, number | null>>({});
+  const canManageWs = ['admin', 'superadmin', 'manager'].includes(String(user?.role));
+
+  useEffect(() => {
+    workspacesApi.list()
+      .then((rows) => setWorkspaces(Array.isArray(rows) ? rows : []))
+      .catch(() => { /* workspaces are additive; page works without them */ });
+  }, []);
+
+  async function createWorkspace() {
+    const name = wsName.trim();
+    if (!name) return;
+    try {
+      const ws = await workspacesApi.create({ name });
+      setWorkspaces((w) => [...w, { ...ws, project_count: 0 }]);
+      setWsName('');
+      setCreatingWs(false);
+      toast.success(`Workspace “${ws.name}” created`);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Could not create workspace');
+    }
+  }
+
+  async function assignWorkspace(projectId: number, workspaceId: number | null) {
+    try {
+      await workspacesApi.assignProject(projectId, workspaceId);
+      setWsOverrides((o) => ({ ...o, [projectId]: workspaceId }));
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Could not move project');
+    }
+  }
+
+  const projectWs = (p: { id: number; workspace_id?: number | null }) =>
+    p.id in wsOverrides ? wsOverrides[p.id] : (p.workspace_id ?? null);
 
   useEffect(() => {
     if (!projects.length) { setComputing(false); return; }
@@ -74,8 +119,43 @@ export function ProjectsPage() {
             <Card pad hover><div className="pj-kpi__val">{portfolio.active}</div><div className="pj-kpi__label">Active</div></Card>
           </div>
 
+          {(workspaces.length > 0 || canManageWs) && (
+            <div className="bf-row bf-gap-2" style={{ flexWrap: 'wrap', margin: 'var(--space-4) 0' }}>
+              <Button size="sm" variant={wsFilter === 'all' ? 'primary' : 'secondary'} onClick={() => setWsFilter('all')}>All</Button>
+              {workspaces.map((w) => (
+                <Button key={w.id} size="sm" variant={wsFilter === w.id ? 'primary' : 'secondary'} onClick={() => setWsFilter(w.id)}>
+                  <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: 4, background: w.color, marginRight: 6 }} />
+                  {w.name}
+                </Button>
+              ))}
+              {workspaces.length > 0 && (
+                <Button size="sm" variant={wsFilter === 'none' ? 'primary' : 'secondary'} onClick={() => setWsFilter('none')}>Ungrouped</Button>
+              )}
+              {canManageWs && (creatingWs ? (
+                <span className="bf-row bf-gap-2">
+                  <Input
+                    autoFocus
+                    placeholder="Workspace name"
+                    value={wsName}
+                    onChange={(e) => setWsName(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') createWorkspace(); if (e.key === 'Escape') setCreatingWs(false); }}
+                    style={{ width: 180 }}
+                  />
+                  <Button size="sm" variant="primary" onClick={createWorkspace} disabled={!wsName.trim()}>Add</Button>
+                  <Button size="sm" variant="ghost" onClick={() => { setCreatingWs(false); setWsName(''); }}>Cancel</Button>
+                </span>
+              ) : (
+                <Button size="sm" variant="ghost" icon="plus" onClick={() => setCreatingWs(true)}>New workspace</Button>
+              ))}
+            </div>
+          )}
+
           <div className="pj-list">
-            {projects.map((p) => {
+            {projects.filter((p) => {
+              if (wsFilter === 'all') return true;
+              const ws = projectWs(p);
+              return wsFilter === 'none' ? ws === null : ws === wsFilter;
+            }).map((p) => {
               const h = health[p.id];
               const color = healthColor(h?.score ?? null);
               return (
@@ -92,6 +172,19 @@ export function ProjectsPage() {
                       {p.address && <span className="pj-meta bf-truncate">{p.address}</span>}
                     </div>
                   </div>
+                  {canManageWs && workspaces.length > 0 && (
+                    <select
+                      className="bf-input"
+                      style={{ width: 150, fontSize: 'var(--text-sm)' }}
+                      value={projectWs(p) ?? ''}
+                      onClick={(e) => e.stopPropagation()}
+                      onChange={(e) => { e.stopPropagation(); assignWorkspace(p.id, e.target.value ? Number(e.target.value) : null); }}
+                      aria-label="Workspace"
+                    >
+                      <option value="">No workspace</option>
+                      {workspaces.map((w) => <option key={w.id} value={w.id}>{w.name}</option>)}
+                    </select>
+                  )}
                   <Icon name="chevronRight" size={16} />
                 </Card>
               );

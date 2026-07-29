@@ -57,12 +57,25 @@ async function main() {
   await call('POST', `/projects/${pid}/tasks`, { title: 'Install windows L2', parent_task_id: task.id, status: 'open' });
   await call('GET', `/projects/${pid}/tasks`);
 
-  // Punch items: full status workflow
+  // Punch items: full status workflow + comments
   const punch = await call('POST', `/projects/${pid}/punch-items`, { title: 'Touch up paint lobby', status: 'open', priority: 'high', location: 'Lobby', trade: 'Paint', due_date: '2026-08-05' });
   await call('PUT', `/punch-items/${punch.id}`, { status: 'in_progress' });
   await call('PUT', `/punch-items/${punch.id}`, { status: 'ready_for_review' });
   await call('PUT', `/punch-items/${punch.id}`, { status: 'closed' });
+  const cmt = await call('POST', `/punch-items/${punch.id}/comments`, { comment: 'Verified complete after repaint' });
+  await call('GET', `/punch-items/${punch.id}/comments`);
+  await call('DELETE', `/punch-items/${punch.id}/comments/${cmt.id}`);
   await call('GET', `/projects/${pid}/punch-items`);
+
+  // Workspaces: CRUD + assign project + scoped listing
+  const ws = await call('POST', '/workspaces', { name: 'Field Ops ' + process.pid, color: '#22c55e' });
+  await call('GET', '/workspaces');
+  await call('PUT', `/workspaces/${ws.id}`, { description: 'Field operations portfolio' });
+  await call('PUT', `/projects/${pid}`, { workspace_id: ws.id });
+  const scoped = await call('GET', `/projects?workspace_id=${ws.id}`);
+  if (!Array.isArray(scoped) || !scoped.some((p) => p.id === pid)) {
+    results.push({ method: 'CHECK', path: 'workspace scoping', status: 500, note: 'project missing from workspace-scoped list' });
+  }
 
   // Sheets: create (returns {sheet, columns, rows}), custom columns, rows, hierarchy
   const created = await call('POST', `/projects/${pid}/sheets`, { name: 'Material tracker' });

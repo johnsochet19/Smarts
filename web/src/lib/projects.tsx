@@ -6,6 +6,7 @@ export interface Project {
   name: string;
   status?: string;
   address?: string | null;
+  workspace_id?: number | null;
 }
 
 interface ProjectState {

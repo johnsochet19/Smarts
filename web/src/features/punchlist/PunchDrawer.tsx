@@ -1,14 +1,14 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Drawer } from '@/components/ui/overlays';
-import { Avatar, Badge, Button } from '@/components/ui/primitives';
+import { Avatar, Badge, Button, Input } from '@/components/ui/primitives';
 import { Icon } from '@/components/ui/Icon';
 import { useToast } from '@/components/ui/toast';
 import { useAuth } from '@/lib/auth';
-import { formatDate, titleCase } from '@/lib/format';
+import { formatDate, formatDateTime, titleCase } from '@/lib/format';
 import { PRIORITY_META, STATUS_META, STATUS_TRANSITIONS } from './constants';
 import type { PunchStatus } from './constants';
 import { punchApi } from './api';
-import type { PunchItem, PunchPhoto } from './types';
+import type { PunchComment, PunchItem, PunchPhoto } from './types';
 
 function fileToDataUrl(file: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -31,6 +31,9 @@ export function PunchDrawer({
   const { user } = useAuth();
   const [busy, setBusy] = useState(false);
   const [photos, setPhotos] = useState<PunchPhoto[]>(item.photos ?? []);
+  const [comments, setComments] = useState<PunchComment[]>([]);
+  const [commentDraft, setCommentDraft] = useState('');
+  const [postingComment, setPostingComment] = useState(false);
   const [recording, setRecording] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
@@ -39,6 +42,38 @@ export function PunchDrawer({
   const meta = STATUS_META[item.status];
   const transitions = STATUS_TRANSITIONS[item.status];
   const isAdmin = user?.role === 'admin' || user?.role === 'superadmin';
+
+  useEffect(() => {
+    let cancelled = false;
+    punchApi.listComments(item.id)
+      .then((rows) => { if (!cancelled) setComments(Array.isArray(rows) ? rows : []); })
+      .catch(() => { /* comments are non-critical; drawer stays usable */ });
+    return () => { cancelled = true; };
+  }, [item.id]);
+
+  async function postComment() {
+    const text = commentDraft.trim();
+    if (!text) return;
+    setPostingComment(true);
+    try {
+      const row = await punchApi.addComment(item.id, text);
+      setComments((c) => [...c, row]);
+      setCommentDraft('');
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Comment failed');
+    } finally {
+      setPostingComment(false);
+    }
+  }
+
+  async function removeComment(c: PunchComment) {
+    try {
+      await punchApi.removeComment(item.id, c.id);
+      setComments((arr) => arr.filter((x) => x.id !== c.id));
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Delete failed');
+    }
+  }
 
   async function move(to: PunchStatus) {
     setBusy(true);
@@ -207,6 +242,44 @@ export function PunchDrawer({
               ))}
             </div>
           )}
+        </div>
+
+        {/* Comments */}
+        <div>
+          <div className="bf-label" style={{ marginBottom: 'var(--space-2)' }}>
+            Comments{comments.length > 0 ? ` (${comments.length})` : ''}
+          </div>
+          {comments.length > 0 && (
+            <div className="bf-col bf-gap-2" style={{ marginBottom: 'var(--space-3)' }}>
+              {comments.map((c) => (
+                <div key={c.id} className="bf-row bf-gap-3" style={{ alignItems: 'flex-start', padding: 'var(--space-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)' }}>
+                  <Avatar name={c.user_name ?? '?'} size={24} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div className="bf-row bf-gap-2">
+                      <span style={{ fontWeight: 600, fontSize: 'var(--text-sm)' }}>{c.user_name ?? 'Unknown'}</span>
+                      <span className="bf-subtle" style={{ fontSize: 'var(--text-xs)' }}>{formatDateTime(c.created_at)}</span>
+                    </div>
+                    <div style={{ fontSize: 'var(--text-sm)', whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{c.comment}</div>
+                  </div>
+                  {(isAdmin || c.user_id === user?.id) && (
+                    <button className="bf-btn bf-btn--ghost bf-btn--sm bf-btn--icon" onClick={() => removeComment(c)} aria-label="Delete comment">
+                      <Icon name="trash" size={14} />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+          <div className="bf-row bf-gap-2">
+            <Input
+              placeholder="Write a comment…"
+              value={commentDraft}
+              onChange={(e) => setCommentDraft(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); postComment(); } }}
+              disabled={postingComment}
+            />
+            <Button variant="primary" size="sm" onClick={postComment} disabled={postingComment || !commentDraft.trim()}>Post</Button>
+          </div>
         </div>
       </div>
     </Drawer>

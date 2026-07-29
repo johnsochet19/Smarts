@@ -2,6 +2,7 @@
 // Kept separate from engine.js (pure) so the decision logic stays testable.
 const db = require('../db');
 const { decide } = require('./engine');
+const mailer = require('../services/mailer');
 
 // Map event resource -> table + assignee column, with a column whitelist so
 // update_field can never inject arbitrary column names.
@@ -58,13 +59,22 @@ async function runAction(action, resInfo, ctx, automation) {
       );
       return 'task created';
     }
-    case 'send_email':
-      // No SMTP configured in this environment — record intent as a notification
-      // and log. Documented as a stub until an email provider is wired.
-      console.log('[automation] send_email (stub):', cfg.to, cfg.subject);
-      await notify(resolveUser(cfg.to, record, automation), 'email',
-        cfg.subject || 'Email', cfg.message || '', cfg.link || '');
-      return 'email queued (stub)';
+    case 'send_email': {
+      // Real delivery when SMTP is configured (see services/mailer.js); the
+      // in-app notification is written either way so nothing is lost when
+      // email is disabled or the relay is down.
+      const userId = resolveUser(cfg.to, record, automation);
+      await notify(userId, 'email', cfg.subject || 'Email', cfg.message || '', cfg.link || '');
+      const address = typeof cfg.to === 'string' && cfg.to.includes('@')
+        ? cfg.to
+        : await mailer.userEmail(db, userId);
+      const result = await mailer.sendMail({
+        to: address,
+        subject: cfg.subject || 'BuildForge automation',
+        text: cfg.message || '',
+      });
+      return result.sent ? 'email sent' : `email not sent (${result.reason})`;
+    }
     default:
       return 'unknown action';
   }

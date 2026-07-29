@@ -109,7 +109,7 @@ const { logChange } = require('../changelog');
 const PROJECT_FIELDS = `id, name, description, project_number, status, type, address, city, state, zip, country,
   start_date, estimated_completion_date, actual_completion_date,
   contract_value, square_footage, owner_company, gc_company, architect_company,
-  timezone, working_days, box_folder_id, created_by, created_at, updated_at`;
+  timezone, working_days, box_folder_id, workspace_id, created_by, created_at, updated_at`;
 
 const ALLOWED_FIELDS = [
   'name', 'description', 'project_number', 'status', 'type',
@@ -117,13 +117,16 @@ const ALLOWED_FIELDS = [
   'start_date', 'estimated_completion_date', 'actual_completion_date',
   'contract_value', 'square_footage',
   'owner_company', 'gc_company', 'architect_company',
-  'timezone', 'working_days', 'box_folder_id'
+  'timezone', 'working_days', 'box_folder_id', 'workspace_id'
 ];
 
-// GET /api/projects — list all
+// GET /api/projects — list all (optionally scoped to ?workspace_id=N)
 router.get('/', auth, async (req, res) => {
   try {
-    const result = await pool.query('SELECT ' + PROJECT_FIELDS + ' FROM projects ORDER BY created_at DESC');
+    const wsId = parseInt(req.query.workspace_id, 10);
+    const result = Number.isFinite(wsId)
+      ? await pool.query('SELECT ' + PROJECT_FIELDS + ' FROM projects WHERE workspace_id = $1 ORDER BY created_at DESC', [wsId])
+      : await pool.query('SELECT ' + PROJECT_FIELDS + ' FROM projects ORDER BY created_at DESC');
     res.json(result.rows);
   } catch (err) { res.status(500).json({ error: err.message }); }
 });

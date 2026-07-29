@@ -1,4 +1,5 @@
 const db = require('./db');
+const mailer = require('./services/mailer');
 
 // ── Trigger Configuration ─────────────────────────────────────────────
 const notificationTriggers = {
@@ -206,7 +207,8 @@ async function fireNotification(entityType, triggerKey, entityId, projectId, exc
     const { title, message, link } = template(record);
     const notifType = entityType + '_' + triggerKey.replace('status_', '').replace('expiration_', 'expiring_');
 
-    // Insert notifications for each recipient
+    // Insert notifications for each recipient; mirror by email when SMTP is
+    // configured (best-effort — a down relay never blocks the trigger).
     const userIds = [...allUserIds];
     for (const uid of userIds) {
       await db.query(
@@ -214,6 +216,10 @@ async function fireNotification(entityType, triggerKey, entityId, projectId, exc
          VALUES ($1,$2,$3,$4,$5,$6,$7,$8,NOW())`,
         [uid, projectId || record.project_id || null, notifType, entityType, entityId, title, message, link || '']
       );
+      if (mailer.isEnabled()) {
+        const address = await mailer.userEmail(db, uid);
+        if (address) mailer.sendMail({ to: address, subject: title, text: message });
+      }
     }
 
     console.log(`[notify] ${entityType}/${triggerKey} → ${userIds.length} user(s)`);

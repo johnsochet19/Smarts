@@ -59,16 +59,18 @@ untouched and deployed from `scheduler`, and every rebuilt module lives here.
 | Audit log | ✅ live-verified |
 | Construction depth: RFIs, submittals, daily logs, inspections, cost mgmt, timesheets, meetings, permits, incidents, observations | ✅ — beyond Smartsheet |
 | CI with live-DB integration gate | ✅ new this session |
-| Multi-tenant organizations/workspaces layer | 🔴 largest remaining architectural gap |
+| Punch item comments | ✅ new this session (migration 010, API, drawer UI) |
+| Workspaces (grouping layer above projects) | ✅ new this session (migration 009, CRUD, scoping, UI) — full org-level multi-tenancy with per-workspace membership remains the follow-up |
+| Email delivery (notifications + automation send_email) | ✅ new this session — SMTP via env config, protocol-verified in tests; plug in any relay (SendGrid/SES/postmark) via `SMTP_*` vars |
 | Google/Outlook two-way calendar sync | 🔴 deferred (OAuth plumbing exists for Google/Box) |
-| Email/SMS/Slack delivery channels | 🔴 deferred |
+| SMS/Slack delivery channels | 🔴 deferred |
 | SSO/OAuth login, WebAuthn | 🔴 deferred |
 | Native mobile wrappers over the new app | 🔴 deferred |
 
 ## Recommended next steps (in order)
-1. **Workspaces/multi-tenancy** — add `organizations` + `workspaces` tables and a
-   tenant column across domain tables (migration-driven; the FK graph is now clean).
+1. **Org-level multi-tenancy** — promote workspaces to org-scoped tenancy with
+   per-workspace membership and row-level scoping across domain tables.
 2. Point the Capacitor shell at `web/dist` to ship the mobile apps on the new UI.
-3. Email delivery (transactional provider) behind the existing notification triggers.
-4. Google Calendar two-way sync on the existing `google_tokens` OAuth plumbing.
-5. Dashboard drag-drop widget layout on the existing widget components.
+3. Google Calendar two-way sync on the existing `google_tokens` OAuth plumbing.
+4. Dashboard drag-drop widget layout on the existing widget components.
+5. SMS (Twilio-style) + Slack webhook channels behind the notification triggers.

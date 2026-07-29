@@ -46,6 +46,7 @@ app.use('/api/auth/login', rateLimit({ windowMs: 15 * 60 * 1000, max: 10, key: '
 // Throttle password-reset requests the same way to blunt abuse / account probing.
 app.use('/api/auth/forgot-password', rateLimit({ windowMs: 15 * 60 * 1000, max: 10, key: 'forgot-password' }));
 app.use('/api/auth', require('./routes/auth'));
+app.use('/api/workspaces', require('./routes/workspaces'));
 app.use('/api/projects', require('./routes/projects'));
 app.use('/api/projects/:id/tasks', require('./routes/tasks'));
 // Legacy: keep /api/tasks for backward compat (schedule page, etc.)

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api } from '@/lib/api';
-import type { CreatePunchInput, PunchItem, PunchPhoto } from './types';
+import type { CreatePunchInput, PunchComment, PunchItem, PunchPhoto } from './types';
 import type { PunchStatus } from './constants';
 
 const base = (projectId: number) => `/projects/${projectId}/punch-items`;
@@ -14,6 +14,9 @@ export const punchApi = {
   addPhoto: (id: number, body: { photo_url: string; caption?: string; media_type?: 'photo' | 'voice'; taken_at?: string }) =>
     api.post<PunchPhoto>(`/punch-items/${id}/photos`, body),
   removePhoto: (id: number, photoId: number) => api.del(`/punch-items/${id}/photos/${photoId}`),
+  listComments: (id: number) => api.get<PunchComment[]>(`/punch-items/${id}/comments`),
+  addComment: (id: number, comment: string) => api.post<PunchComment>(`/punch-items/${id}/comments`, { comment }),
+  removeComment: (id: number, commentId: number) => api.del(`/punch-items/${id}/comments/${commentId}`),
 };
 
 /** Loads + caches punch items for a project, with optimistic helpers. */

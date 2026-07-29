@@ -7,6 +7,13 @@ export function formatDate(value?: string | null, opts?: Intl.DateTimeFormatOpti
   return d.toLocaleDateString(undefined, opts ?? { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
+export function formatDateTime(value?: string | null): string {
+  if (!value) return '';
+  const d = new Date(value);
+  if (isNaN(d.getTime())) return '';
+  return d.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+}
+
 export function relativeDays(value?: string | null): { label: string; overdue: boolean } | null {
   if (!value) return null;
   const d = new Date(value);

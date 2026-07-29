@@ -1,5 +1,17 @@
 # Live End-to-End QA Report — 2026-07-29
 
+> **Updated (same day, functionality pass):** three functional gaps were closed
+> and re-verified end-to-end — real SMTP **email delivery** (mailer service +
+> automation `send_email` action, previously a logged stub + email mirroring of
+> notification triggers; asserted at the SMTP-protocol level against a live
+> local sink in `backend/test/mailer.test.js`), **workspaces** (migration 009,
+> CRUD API, project scoping, projects-page UI with filter chips and per-project
+> assignment), and **punch item comments** (migration 010, endpoints, drawer UI
+> with post/delete). Final numbers after this pass: **21/21 unit tests**,
+> **10/10 migrations** on a fresh DB with a zero-error boot, **53/53 live
+> integration calls**, and a **24-step browser E2E** (desktop + mobile) with
+> 0 console errors / 0 page errors / 0 failed requests.
+
 The previous QA pass (`docs/QA-REPORT.md`) was **static**: typecheck, build, unit
 tests, syntax. This session performed the first **live** verification — real
 PostgreSQL 16, real server boot, real Chromium browser, desktop and mobile — and

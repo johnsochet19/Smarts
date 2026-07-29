@@ -52,6 +52,14 @@ var STATUS_TRANSITIONS = {
       uploaded_by INTEGER REFERENCES users(id)
     )`);
 
+    await db.query(`CREATE TABLE IF NOT EXISTS punch_item_comments (
+      id SERIAL PRIMARY KEY,
+      punch_item_id INTEGER REFERENCES punch_items(id) ON DELETE CASCADE,
+      user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+      comment TEXT NOT NULL,
+      created_at TIMESTAMP DEFAULT NOW()
+    )`);
+
     /* ── legacy migrations from old punch_list table ── */
     var hasOld = await db.query(`SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'punch_list')`);
     if (hasOld.rows[0].exists) {
@@ -363,6 +371,50 @@ router.delete('/:punchId/photos/:photoId', authenticate, async function(req, res
     var result = await db.query('DELETE FROM punch_item_photos WHERE id = $1 AND punch_item_id = $2 RETURNING id', [req.params.photoId, req.params.punchId]);
     if (!result.rows.length) return res.status(404).json({ error: 'Photo not found' });
     res.json({ message: 'Photo deleted' });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+/* ── comments sub-resource ───────────────────────────── */
+
+// GET /:punchId/comments
+router.get('/:punchId/comments', authenticate, async function(req, res) {
+  try {
+    var result = await db.query(
+      `SELECT c.*, u.name AS user_name FROM punch_item_comments c
+       LEFT JOIN users u ON u.id = c.user_id
+       WHERE c.punch_item_id = $1 ORDER BY c.created_at ASC`,
+      [req.params.punchId]
+    );
+    res.json(result.rows);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// POST /:punchId/comments
+router.post('/:punchId/comments', authenticate, async function(req, res) {
+  try {
+    var item = await db.query('SELECT id FROM punch_items WHERE id = $1', [req.params.punchId]);
+    if (!item.rows.length) return res.status(404).json({ error: 'Punch item not found' });
+    var comment = req.body && req.body.comment;
+    if (!comment || !String(comment).trim()) return res.status(400).json({ error: 'comment required' });
+    var result = await db.query(
+      'INSERT INTO punch_item_comments (punch_item_id, user_id, comment) VALUES ($1,$2,$3) RETURNING *',
+      [req.params.punchId, req.user.id, String(comment).trim()]
+    );
+    var row = result.rows[0];
+    row.user_name = req.user.name || null;
+    res.status(201).json(row);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// DELETE /:punchId/comments/:commentId — author or admin only
+router.delete('/:punchId/comments/:commentId', authenticate, async function(req, res) {
+  try {
+    var isAdmin = req.user.role === 'admin' || req.user.role === 'superadmin';
+    var result = isAdmin
+      ? await db.query('DELETE FROM punch_item_comments WHERE id = $1 AND punch_item_id = $2 RETURNING id', [req.params.commentId, req.params.punchId])
+      : await db.query('DELETE FROM punch_item_comments WHERE id = $1 AND punch_item_id = $2 AND user_id = $3 RETURNING id', [req.params.commentId, req.params.punchId, req.user.id]);
+    if (!result.rows.length) return res.status(404).json({ error: 'Comment not found' });
+    res.json({ message: 'Comment deleted' });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
