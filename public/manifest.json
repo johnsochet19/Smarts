@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "Triad — One question, every source",
+  "version": "1.3.0",
+  "description": "Ask once. Triad picks the best of Claude, Perplexity, your WhatsApp chat and your project board automatically.",
+  "permissions": ["storage", "activeTab", "tabs", "scripting"],
+  "host_permissions": ["https://web.whatsapp.com/*", "https://john-projects.sites.tab.bot/*"],
+  "content_scripts": [
+    { "matches": ["https://web.whatsapp.com/*"], "js": ["content-script.js"], "run_at": "document_idle" }
+  ],
+  "action": {
+    "default_popup": "index.html",
+    "default_title": "Triad",
+    "default_icon": { "16": "icons/icon-16.png", "32": "icons/icon-32.png", "48": "icons/icon-48.png", "128": "icons/icon-128.png" }
+  },
+  "icons": { "16": "icons/icon-16.png", "32": "icons/icon-32.png", "48": "icons/icon-48.png", "128": "icons/icon-128.png" }
+}

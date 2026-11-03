@@ -1,0 +1,77 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+/* Triad palette: warm paper ground, ink text, indigo accent. */
+:root {
+  --background: #fafaf8;
+  --foreground: #16181d;
+  --card: #ffffff;
+  --card-foreground: #16181d;
+  --muted: #f2f2ef;
+  --muted-foreground: #5f636b;
+  --border: #e4e4e0;
+  --input: #d6d6d1;
+  --primary: #3346c8;
+  --primary-foreground: #ffffff;
+  --destructive: #c62828;
+  --ring: #3346c8;
+}
+
+.dark {
+  --background: #111318;
+  --foreground: #ecedef;
+  --card: #181b22;
+  --card-foreground: #ecedef;
+  --muted: #1e222a;
+  --muted-foreground: #a0a5b0;
+  --border: #2a2f39;
+  --input: #363c48;
+  --primary: #8b9bff;
+  --primary-foreground: #0e1120;
+  --destructive: #f87171;
+  --ring: #8b9bff;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-destructive: var(--destructive);
+  --color-ring: var(--ring);
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+* {
+  border-color: var(--border);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Toolbar popup: Chrome caps popups at 800x600. */
+html.popup,
+html.popup body {
+  width: 400px;
+  height: 600px;
+  overflow: hidden;
+}
