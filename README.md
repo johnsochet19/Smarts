@@ -1,36 +1,36 @@
-# Triad — Chrome extension
+# Triad — One question, every source
 
-Ask once. Triad picks the best of Claude, Perplexity, your open WhatsApp Web chat
-and your project board (john-projects.sites.tab.bot), opens the right tabs with a
-ready-made prompt, and keeps every question as a conversation you can reopen.
+A Chrome extension. Ask once and Triad sends your question to **Claude**, **Perplexity**
+or both, and brings your **project board** along when you ask about your projects.
 
-Rebuilt from the Shipper export (`unified-intelligence-hub`) as a plain
-Vite + React + Tailwind v4 project: no Shipper plugins, no CRXJS, about 40% smaller bundle.
+## Install (2 minutes, no tools needed)
 
-## Build and install
+1. On this GitHub page click **Code → Download ZIP**, then unzip it.
+2. In Chrome open `chrome://extensions` and turn on **Developer mode** (top right).
+3. Click **Load unpacked** and choose the **`extension`** folder inside the unzipped folder.
+   (Not the top folder — the `extension` folder inside it.)
+4. Pin Triad from the puzzle-piece menu so its icon stays in the toolbar.
+
+Updating later: download again, replace the folder, and press the reload arrow on
+Triad's card in `chrome://extensions`.
+
+## Using it
+
+- Click the Triad icon and type a question.
+- Triad picks who answers: Perplexity for live facts and news, Claude for thinking and
+  writing, and your project board when the question is about your projects. You can
+  switch any of them on or off under **Will use** before you press Ask.
+- **Settings** (sliders icon): paste your project board link. If the board isn't open,
+  Triad opens it in a pinned background tab and reads it. If the board asks you to sign
+  in, sign in once in that tab.
+- Every question is saved as a conversation; **Continue in Claude / Perplexity** jumps
+  back to the same chat.
+
+## For developers
 
 ```bash
 npm install
-npm run build        # -> dist/
+npm run build   # builds and refreshes the extension/ folder
 ```
 
-Chrome → `chrome://extensions` → turn on **Developer mode** → **Load unpacked** → pick `dist/`.
-`npm run zip` also writes `triad-extension.zip` for the Chrome Web Store.
-
-`npm run dev` serves the UI at localhost with a sample WhatsApp chat and sample
-board (no Chrome APIs needed).
-
-## Layout
-
-| Path | What it is |
-| --- | --- |
-| `src/lib/engines.ts` | Routing rules, prompt building, reading WhatsApp / the board, tab handling |
-| `src/App.tsx` | Popup (400×600) and full-window UI, conversations, rules panel |
-| `src/hooks/useChromeStorage.ts` | `chrome.storage.local` state (localStorage outside the extension) |
-| `public/content-script.js` | WhatsApp Web: linked / out-of-sync / unlinked dot before each chat name |
-| `public/manifest.json` | Manifest V3 |
-| `scripts/make-icons.mjs` | Regenerates `public/icons/*.png` from the logo (needs Playwright) |
-
-Storage keys: `triad:rules`, `triad:conversations`, `triad:chat-links`,
-`triad:projects`, `triad:history` (legacy, migrated on first open) — unchanged
-from the original, so an existing install keeps its data when updated in place.
+`src/lib/engines.ts` has the routing, prompts and board reading; `src/App.tsx` the UI.

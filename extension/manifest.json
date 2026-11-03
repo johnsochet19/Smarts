@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "Triad — One question, every source",
+  "version": "2.0.0",
+  "description": "Ask once. Triad sends your question to Claude and Perplexity and brings your project board along.",
+  "permissions": ["storage", "tabs", "scripting"],
+  "host_permissions": ["https://*.tab.bot/*"],
+  "optional_host_permissions": ["https://*/*", "http://*/*"],
+  "action": {
+    "default_popup": "index.html",
+    "default_title": "Triad",
+    "default_icon": { "16": "icons/icon-16.png", "32": "icons/icon-32.png", "48": "icons/icon-48.png", "128": "icons/icon-128.png" }
+  },
+  "icons": { "16": "icons/icon-16.png", "32": "icons/icon-32.png", "48": "icons/icon-48.png", "128": "icons/icon-128.png" }
+}

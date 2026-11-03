@@ -1,13 +1,13 @@
 {
   "name": "triad-extension",
   "private": true,
-  "version": "1.3.0",
+  "version": "2.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && rm -rf extension && cp -r dist extension",
     "icons": "node scripts/make-icons.mjs",
-    "zip": "npm run build && cd dist && zip -qr ../triad-extension.zip ."
+    "zip": "npm run build && cd extension && zip -qr ../triad-extension.zip ."
   },
   "dependencies": {
     "react": "^19.3.1",
